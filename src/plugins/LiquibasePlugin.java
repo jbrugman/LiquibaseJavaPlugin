@@ -16,7 +16,7 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.FileSystemResourceAccessor;
-import models.utils.exception.EviewLogger;
+import models.utils.exception.Logger;
 
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -113,13 +113,13 @@ public class LiquibasePlugin extends Plugin implements HandleWebCommandSupport {
             }
           }
         } else {
-          EviewLogger.info(getClassName() + " Liquibase did not find any changesets.");
+          Logger.info(getClassName() + " Liquibase did not find any changesets.");
         }
       } else {
-        EviewLogger.warn(getClassName() + " Apply Liquibase disabled in configuration for datasource: " + dataSourceName);
+        Logger.warn(getClassName() + " Apply Liquibase disabled in configuration for datasource: " + dataSourceName);
       }
     }
-    EviewLogger.info(getClassName() + " finished (ok)");
+    Logger.info(getClassName() + " finished (ok)");
   }
 
   /**
@@ -176,9 +176,9 @@ public class LiquibasePlugin extends Plugin implements HandleWebCommandSupport {
   private String tagCurrentState(Liquibase liquibase) {
     String tag = getTag();
     try {
-      EviewLogger.info(getClassName() + " Liquibase tagging current state ...");
+      Logger.info(getClassName() + " Liquibase tagging current state ...");
       liquibase.tag(tag);
-      EviewLogger.info(getClassName() + " Liquibase tagging current state (ok)");
+      Logger.info(getClassName() + " Liquibase tagging current state (ok)");
       return tag;
     } catch (LiquibaseException e) {
       throw new PlayException(getClassName() + " cannot tag current state", e.getMessage());
@@ -193,12 +193,12 @@ public class LiquibasePlugin extends Plugin implements HandleWebCommandSupport {
    */
   private boolean testRollback(Liquibase liquibase) {
     try {
-      EviewLogger.info(getClassName() + " Liquibase test rollback changesets ...");
+      Logger.info(getClassName() + " Liquibase test rollback changesets ...");
       liquibase.updateTestingRollback(getContext());
-      EviewLogger.info(getClassName() + " Liquibase test rollback changesets (ok)");
+      Logger.info(getClassName() + " Liquibase test rollback changesets (ok)");
       return true;
     } catch (LiquibaseException e) {
-      EviewLogger.warn(getClassName() + " Liquibase test rollback changesets (FAIL)");
+      Logger.warn(getClassName() + " Liquibase test rollback changesets (FAIL)");
       return false;
     }
   }
@@ -211,9 +211,9 @@ public class LiquibasePlugin extends Plugin implements HandleWebCommandSupport {
    */
   private void rollback(Liquibase liquibase, String tag) {
     try {
-      EviewLogger.info(getClassName() + " Liquibase trying rollback to tag: " + tag);
+      Logger.info(getClassName() + " Liquibase trying rollback to tag: " + tag);
       liquibase.rollback(tag, getContext());
-      EviewLogger.info(getClassName() + " Liquibase trying rollback (ok)");
+      Logger.info(getClassName() + " Liquibase trying rollback (ok)");
     } catch (LiquibaseException e) {
       throw new PlayException(getClassName() + " cannot rollback changeset", e.getMessage());
     }
@@ -227,13 +227,13 @@ public class LiquibasePlugin extends Plugin implements HandleWebCommandSupport {
    */
   private boolean update(Liquibase liquibase) {
     try {
-      EviewLogger.info(getClassName() + " Liquibase applying changesets ...");
+      Logger.info(getClassName() + " Liquibase applying changesets ...");
       liquibase.update(getContext());
-      EviewLogger.info(getClassName() + " Liquibase applying changesets (ok)");
+      Logger.info(getClassName() + " Liquibase applying changesets (ok)");
       return true;
     } catch (LiquibaseException e) {
-      EviewLogger.warn(getClassName() + " Liquibase applying changesets (FAIL)");
-      EviewLogger.error(getClassName() + " Liquibase applying changesets error", e);
+      Logger.warn(getClassName() + " Liquibase applying changesets (FAIL)");
+      Logger.error(getClassName() + " Liquibase applying changesets error", e);
       return false;
     }
   }
@@ -313,7 +313,7 @@ public class LiquibasePlugin extends Plugin implements HandleWebCommandSupport {
       p.setString(4, tag);
       p.execute();
 
-      EviewLogger.info(getClassName() + " Cobtent inserted changelog (ok)");
+      Logger.info(getClassName() + " Cobtent inserted changelog (ok)");
 
     } catch (SQLException e) {
       rollback(liquibase, tag);
@@ -334,10 +334,10 @@ public class LiquibasePlugin extends Plugin implements HandleWebCommandSupport {
    */
   private void checkOrCreateContentChangelogTable(DataSource dataSource) {
     if (doesTableExist("CONTENTCHANGELOG", dataSource)) {
-      EviewLogger.info(getClassName() + "   Changelog table exists...");
+      Logger.info(getClassName() + "   Changelog table exists...");
     } else {
       createContentChangelogTable(dataSource);
-      EviewLogger.info(getClassName() + " Created   Changelog table...");
+      Logger.info(getClassName() + " Created   Changelog table...");
     }
   }
 
@@ -422,7 +422,7 @@ public class LiquibasePlugin extends Plugin implements HandleWebCommandSupport {
       FileWriter file = new FileWriter(filename);
       file.write(content);
       file.close();
-      EviewLogger.info(getClassName() + " Created: " + filename);
+      Logger.info(getClassName() + " Created: " + filename);
     } catch (IOException e) {
       throw new PlayException(getClassName() + " IO error", e.getMessage());
     }
@@ -484,7 +484,7 @@ public class LiquibasePlugin extends Plugin implements HandleWebCommandSupport {
       }
     } finally {
       if (bSucceeded) {
-        EviewLogger.info("Liquibase service - Renamed " + oldName + " to " + newName);
+        Logger.info("Liquibase service - Renamed " + oldName + " to " + newName);
         srcFile.delete();
       }
     }
@@ -516,7 +516,7 @@ public class LiquibasePlugin extends Plugin implements HandleWebCommandSupport {
         while (lqbResultSet.next()) {
           String filename = lqbResultSet.getString("filename");
           if (!doesFileExist(filename)) {
-            EviewLogger.warn(getClassName() + " Missing changelog file: " + filename);
+            Logger.warn(getClassName() + " Missing changelog file: " + filename);
 
             contentStatement.setString(1, filename);
             contentStatement.execute();
@@ -553,7 +553,7 @@ public class LiquibasePlugin extends Plugin implements HandleWebCommandSupport {
             ResultSet contentResultSet = contentStatement.getResultSet();
             if (contentResultSet.next()) {
               if (!contentResultSet.getString("content").equals(content)) {
-                EviewLogger.info(getClassName() + " Changed changeset, rolling back so we can replace it.");
+                Logger.info(getClassName() + " Changed changeset, rolling back so we can replace it.");
                 // Rename file
                 renameFile(filename, filename + ".tmp");
 
@@ -573,14 +573,14 @@ public class LiquibasePlugin extends Plugin implements HandleWebCommandSupport {
                 renameFile(filename + ".tmp", filename);
               }
             } else {
-              EviewLogger.info(getClassName() + " No changes for " + filename);
+              Logger.info(getClassName() + " No changes for " + filename);
             }
           }
         }
 
       } else {
         // Nothing to do, the Liquibase changelog table does not yet exist. (clean run)
-        EviewLogger.info(getClassName() + " First time run, no compare needed.");
+        Logger.info(getClassName() + " First time run, no compare needed.");
       }
     } catch (SQLException e) {
       throw new PlayException(getClassName() + " SQL error", e.getMessage());
