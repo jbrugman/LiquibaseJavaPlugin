@@ -16,7 +16,6 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.FileSystemResourceAccessor;
-import models.utils.exception.Logger;
 
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
