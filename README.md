@@ -28,3 +28,6 @@ Test if Liquibase is able to apply them
 Apply the changes to the database
 
 Store the changes made from the changelog file in our CONTENTCHANGELOG table
+
+Licence
+This source code is released under the Apache 2 licence.
