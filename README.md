@@ -10,11 +10,17 @@ On start (of the application) it first checks if the CONTENTCHANGELOG table exis
 Next, it checks if all changelog files (containing the Liquibase change sets) that are defined in the
 DATABASECHANGELOG table are available.
 If not, there probably is a checkout of older code from Github, so it reacts as following:
+
 A: Regenerate the changelog file as it's stored in the CONTENTCHANGELOG table
+
 B: Generate a temp master file for Liquibase
+
 C: Rollback the last change
+
 D: Clean up the master temp file and regenerated changelog file
+
 E: Clean up the database ( Delete the corresponding row in the CONTENTCHANGELOG table ).
+
 Do this for all found changelog items. (it iterates sorted by ORDEREXECUTED)
 
 Next check all available changelogs to see if there are changes made to it, and if so, rollback the old change, so
